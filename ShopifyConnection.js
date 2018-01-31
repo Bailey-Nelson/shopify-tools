@@ -1,39 +1,32 @@
 const axios = require('axios');
 
 module.exports = class ShopifyConnection {
-  constructor(admin_url, store_url, name) {
-    this.url = admin_url;
-    this.store_url = store_url;
-    this.name = name;
-    this.callback_url;
+  constructor(adminUrl, storeUrl, callbackUrl, storeName) {
+    this.adminUrl = adminUrl;                  // bncanada.myshopify.com
+    this.storeUrl = storeUrl;                  // baileynelson.com
+    this.name = storeName;                     // CA
+    this.callbackUrl = callbackUrl;            // shopify.bndev.ca
+    this.topics = require('./webhooks.json');  // ['orders/cancelled', 'customers/created', ...]
     this.pageSize = 100;
   }
 
-  registerWebhook(base_url, topic, address) {
-    return axios.post(`${base_url}/webhooks.json`, {
-      webhook: {
-        topic,
-        address,
-        format: 'json'
-      }
+  _registerWebhook(topic) {
+    const address = this.callbackUrl;
+    return axios.post(`${this.adminUrl}/webhooks.json`, {
+      webhook: { topic, address, format: 'json' }
     });
   }
 
-  getWebhooks(base_url) {
-    return axios.get(`${base_url}/webhooks.json`);
-  }
-
-  deleteWebhook(base_url, id) {
-    return axios.delete(`${base_url}/webhooks/${id}.json`);
+  _deleteWebhook(id) {
+    return axios.delete(`${this.adminUrl}/webhooks/${id}.json`);
   }
 
   async deleteWebhooks() {
-    const data = await this.getWebhooks(this.url);
-    const webhooks = data.data.webhooks;
+    const webhooks = await this.getAll('webhooks');
   
     if(webhooks.length > 0) {
       try {
-        const response = await axios.all(webhooks.map(webhook => this.deleteWebhook(this.url, webhook.id)));
+        await axios.all(webhooks.map(webhook => this._deleteWebhook(webhook.id)));
         return webhooks.length;
       } catch(err) {
         console.error(err.message);
@@ -43,29 +36,16 @@ module.exports = class ShopifyConnection {
     }
   }
 
-  async createWebhooks() {
-    const webhookTopics = [
-      'orders/cancelled',
-      'orders/create',
-      'orders/delete',
-      'orders/fulfilled',
-      'orders/paid',
-      'orders/partially_fulfilled',
-      'orders/updated',
-      'draft_orders/create',
-      'draft_orders/delete',
-      'draft_orders/update'
-    ];
-    
+  async registerWebhooks() {
     try {
-      await axios.all(webhookTopics.map(topic => this.registerWebhook(this.url, topic, `${this.callback_url}/${topic.split('/')}`)));
-      return webhookTopics.length;
+      await axios.all(this.topics.map(topic => this._registerWebhook(topic)));
+      return this.topics.length;
     } catch(err) {
-      if(err.response  !== undefined && err.response.status === 422) {
+      if(err.response !== undefined && err.response.status === 422) {
         console.log('Webhook already exists');
+        return 0;
         // console.log(err.response.data.errors)
-      } else
-        console.error(err);
+      } else console.error(err);
     }
   }
 
@@ -76,14 +56,15 @@ module.exports = class ShopifyConnection {
     const items = [];
     // ?limit=250&page=1
     for(let page = 1; page <= pages; page++) {
-      const response = await axios.get(`${this.url}/${type}.json?limit=${this.pageSize}&page=${page}`);
+      const url = `${this.adminUrl}/${type}.json?limit=${this.pageSize}&page=${page}`;
+      const response = await axios.get(url);
       items.push(...response.data[type]);
     }
     return items;
   }
   
   async getCount(type) {
-    const response = await axios.get(`${this.url}/${type}/count.json`);
+    const response = await axios.get(`${this.adminUrl}/${type}/count.json`);
     return response.data.count;
   }
 }

@@ -1,14 +1,21 @@
 {
   "name": "shopify-tools",
   "version": "1.0.0",
-  "description": "",
+  "description": "Tools to make backend development utilizing the shopify APIs a little easier.",
   "main": "index.js",
   "scripts": {
-    "products": "node -r dotenv/config products.js"
+    "products": "node -r dotenv/config products.js",
+    "webhooks": "node -r dotenv/config manage-webhooks.js",
+    "customers": "node -r dotenv/config load-customers.js"
   },
-  "author": "",
+  "author": "Brycen Dorsay",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bailey-Nelson/shopify-tools.git"
+  },
   "dependencies": {
+    "analytics-node": "^3.2.0",
     "axios": "^0.17.1",
     "dotenv": "^4.0.0"
   }

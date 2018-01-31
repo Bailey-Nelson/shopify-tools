@@ -1,0 +1,6 @@
+[
+  "orders/cancelled",
+  "orders/create",
+  "customers/create",
+  "customers/update"
+]
