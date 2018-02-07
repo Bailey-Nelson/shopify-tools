@@ -21,6 +21,26 @@ module.exports = class ShopifyConnection {
     return axios.delete(`${this.adminUrl}/webhooks/${id}.json`);
   }
 
+  _createGiftCard(gift_card) {
+    return axios.post(`${this.adminUrl}/gift_cards.json`, { gift_card });
+  }
+
+  async createGiftCards(giftCards) {
+    for(const giftCard of giftCards) {
+      const { initial_value, code, expires_on } = giftCard;
+      const obj = { initial_value, code, expires_on };
+      try {
+        await this._createGiftCard(obj);
+        console.log('gift card created');
+      } catch(err) {
+        if(err.message.includes('422')) console.log('Gift card already exists')
+      }
+      // break;
+    }
+
+    console.log('gift cards created');
+  }
+
   async deleteWebhooks() {
     const webhooks = await this.getAll('webhooks');
   
