@@ -4,10 +4,12 @@
   "description": "Tools to make backend development utilizing the shopify APIs a little easier.",
   "main": "index.js",
   "scripts": {
-    "products": "node -r dotenv/config products.js",
-    "webhooks": "node -r dotenv/config manage-webhooks.js",
-    "customers": "node -r dotenv/config load-customers.js",
-    "giftcards": "node -r dotenv/config gift-cards.js"
+    "products": "node -r dotenv/config src/products.js",
+    "webhooks": "node -r dotenv/config src/manage-webhooks.js",
+    "customers": "node -r dotenv/config src/load-customers.js",
+    "giftcards": "node -r dotenv/config src/ift-cards.js",
+    "metafields": "node -r dotenv/config src/metafields.js",
+    "barcodes": "node -r dotenv/config src/barcodes.js"
   },
   "author": "Brycen Dorsay",
   "license": "ISC",
