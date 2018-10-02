@@ -3,9 +3,7 @@ const
   createStores = require('./create-stores');
 
 
-main();
-
-async function main() {
+!async function main() {
   const env = envConfig(process.env);
   const stores = createStores(env);
   
@@ -23,7 +21,7 @@ async function main() {
     // TODO: Send to connected accounts db
     
   };
-}
+}();
 
 function buildSKUList(products, url) {
   const result = [];

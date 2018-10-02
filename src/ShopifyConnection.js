@@ -70,14 +70,14 @@ module.exports = class ShopifyConnection {
     }
   }
 
-  async getAll(type) {
+  async getAll(type, fields) {
     // Get item count
     const count = await this.getCount(type);
     const pages = (count / this.pageSize) + 1;
     const items = [];
     // ?limit=250&page=1
     for(let page = 1; page <= pages; page++) {
-      const url = `${this.adminUrl}/${type}.json?limit=${this.pageSize}&page=${page}`;
+      const url = `${this.adminUrl}/${type}.json?limit=${this.pageSize}&page=${page}${fields ? `&fields=${fields.join(',')}` : ''}`;
       const response = await axios.get(url);
       items.push(...response.data[type]);
     }
@@ -89,11 +89,18 @@ module.exports = class ShopifyConnection {
     return response.data.count;
   }
 
+  /**
+   * Update a variant with {kv} values given {id}. Only values provided in {kv} will be updated
+   * @param {Integer} id Shopify Variant ID of the variant to update
+   * @param {Object} kv object containing key/values of fields to update
+   * @returns {Boolean} returns true or false representing success status of update
+   */
   async updateVariant(id, kv) {
     const body = { variant: Object.assign({ id }, kv) };
 
     let failed = false;
     try {
+      // console.log(id, kv)
       await axios.put(`${this.adminUrl}/variants/${id}.json`, body);
     } catch(err) {
       failed = true;
@@ -105,6 +112,7 @@ module.exports = class ShopifyConnection {
       else
         this.logger.update(false, 0, 1);
     }
+    return !failed;
   }
 
   async _handleErrors(err, id) {
@@ -116,15 +124,15 @@ module.exports = class ShopifyConnection {
   
       switch(err.response.status) {
         case 404:
-          // console.log(`ID not found ${id}`);
+          console.log(`ID not found ${id}`);
           break;
         case 429:
-          // console.log(`rate limit hit: waiting to cool off`);
+          console.log(`rate limit hit: waiting to cool off`);
           await this.wait(2000);
-          // console.log('after wait')
+          console.log('after wait')
           break;
         default:
-          // console.log(`uncaught error: ${err.response.status}`);
+          console.log(`uncaught error: ${err.response.status}`);
       }
 
     } catch(err2) {
