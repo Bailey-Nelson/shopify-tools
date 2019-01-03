@@ -1,6 +1,45 @@
-[
-  "orders/cancelled",
-  "orders/create",
-  "customers/create",
-  "customers/update"
-]
+{
+  "addresses": {
+    "dev": {
+      "ca": "https://api.bndev.ca/shopify",
+      "order_light": "https://orderslight.ngrok.io"
+    },
+    "prod": {
+      "ca": "https://api.baileynelson.com/shopify"
+    }
+  },
+  "topics": {
+    "order_created": "orders/create",
+    "order_cancelled": "orders/cancelled",
+    "customer_created": "customers/create",
+    "customer_updated": "customers/update"
+  },
+  "webhooks": [
+    {
+      "topic": "order_created",
+      "address": "order_light",
+      "path": "/order_created"
+    },
+    {
+      "topic": "order_cancelled",
+      "address": "order_light",
+      "path": "/order_cancelled"
+    },
+    {
+      "topic": "order_created",
+      "address": "ca"
+    },
+    {
+      "topic": "customer_created",
+      "address": "ca"
+    },
+    {
+      "topic": "customer_updated",
+      "address": "ca"
+    },
+    {
+      "topic": "order_cancelled",
+      "address": "ca"
+    }
+  ]
+}
